@@ -17,8 +17,8 @@ public class Assign4
 
 }
 
-public interface BarcodeIO {
-   //implamenting methods 
+interface BarcodeIO {
+        //methods to implement 
 	boolean scan(final BarcodeImage bc);
 	
 	boolean readText(final String test);
@@ -33,7 +33,7 @@ public interface BarcodeIO {
 	
 }
 
-public class BarcodeImage implements Cloneable
+class BarcodeImage implements Cloneable
 {
 	
 	public static final int MAX_HEIGHT = 30;
@@ -41,8 +41,11 @@ public class BarcodeImage implements Cloneable
 	public static final int MAX_WIDTH = 65;
 	
 	private boolean [][] imageData;
+	
 	public BarcodeImage() {
 		imageData = new boolean[MAX_HEIGHT][MAX_WIDTH];
+		// we can leave just imageData = new boolean[MAX_HEIGHT][MAX_WIDTH]; without nested for loop
+		//as by default boolean is false 
 		for(int x = 0; x < MAX_WIDTH; x++) {
 			for (int y = 0; y < MAX_HEIGHT; y++) {
 				setPixel(x, y, false);

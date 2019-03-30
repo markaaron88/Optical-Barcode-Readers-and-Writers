@@ -36,16 +36,19 @@ interface BarcodeIO {
 class BarcodeImage implements Cloneable
 {
 	
+	//the dimension highest height of dimension for our data
 	public static final int MAX_HEIGHT = 30;
-	
+	//max dimension of our data
 	public static final int MAX_WIDTH = 65;
-	
+	//array to store image in x and y
 	private boolean [][] imageData;
 	
+	/*default constructor to set image data to false
+	 * whih is empty space. looping through height and
+	 * width to setpixel to false
+	 */
 	public BarcodeImage() {
 		imageData = new boolean[MAX_HEIGHT][MAX_WIDTH];
-		// we can leave just imageData = new boolean[MAX_HEIGHT][MAX_WIDTH]; without nested for loop
-		//as by default boolean is false 
 		for(int x = 0; x < MAX_WIDTH; x++) {
 			for (int y = 0; y < MAX_HEIGHT; y++) {
 				setPixel(x, y, false);
@@ -55,14 +58,26 @@ class BarcodeImage implements Cloneable
 	public BarcodeImage(String[] strData) {
 		
 	}
-	
+	//accessor method that return image data in 2d array
 	public boolean getPixel(int row, int col) {
-		return false;
+		try {
+			return imageData[row][col];
+			}catch(IndexOutOfBoundsException e)
+		{
+				return false;
+		}
 	}
-	
+	/*mutator method for index 2d array of image
+	 * and re-assign it to a value
+	 */
 	public boolean setPixel(int row, int col, boolean value) {
-		return false;
+		try {
+			imageData[row][col] = value;
+			return true;
+		}catch (IndexOutOfBoundsException e)
+		{
+			return false;
+		}
 	}
-	
 	
 }

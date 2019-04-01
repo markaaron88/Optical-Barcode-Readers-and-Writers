@@ -59,7 +59,6 @@ public class Assig4
             "                                          ", 
             "                                          " };
 
-      
       BarcodeImage bc = new BarcodeImage(sImageIn);
       System.out.println("Debug BarcodeImage class.");
       bc.displayToConsole();
@@ -70,8 +69,8 @@ public class Assig4
       dm.displayTextToConsole();
       System.out.println("\nNow you see a raw unformatted image\n");
       dm.displayRawImage();
-      System.out
-            .println("\nNow you see formatted image without blank right " + "columns and blank top rows.\nEnjoy!\n");
+      System.out.println("\nNow you see formatted image without blank right " + 
+         "columns and blank top rows.\nEnjoy!\n");
       dm.displayImageToConsole();
 
       // second secret message
@@ -83,36 +82,17 @@ public class Assig4
       dm.displayTextToConsole();
       System.out.println("\nNow you see a raw unformatted image\n");
       dm.displayRawImage();
-      System.out
-            .println("\nNow you see formatted image without blank right " + "columns and blank top rows.\nEnjoy!\n");
+      System.out.println("\nNow you see formatted image without blank right " + 
+         "columns and blank top rows.\nEnjoy!\n");
       dm.displayImageToConsole();
 
       // create your own message
-      System.out.println("Look Below");
       dm.readText("What a great resume builder this is!");
-      System.out.println("Look Above");
       dm.generateImageFromText();
       dm.displayTextToConsole();
       dm.displayImageToConsole();
+      dm.displayRawImage();
       
-      
-      bc = new BarcodeImage(sImageIn);
-      System.out.println("Debug BarcodeImage class.");
-      bc.displayToConsole();
-      DataMatrix testMatrix = new DataMatrix(bc);
-      System.out.println("Printing DataMatrix Raw (clean):");
-      testMatrix.displayRawImage();
-      System.out.println("Printing Clean "
-            + "Image:");
-      testMatrix.displayImageToConsole();
-      System.out.println("Display Test Message: ");
-      testMatrix.translateImageToText();
-      testMatrix.displayTextToConsole();
-      
-      System.out.println("Testing String constructor");
-      DataMatrix testMatrix2 = new DataMatrix("What a great resume builder this is!");
-      testMatrix2.generateImageFromText();
-      testMatrix2.displayImageToConsole();
    }
 }
 
@@ -168,9 +148,9 @@ class BarcodeImage implements Cloneable
    }
 
    /*
-    * Private helper for constructor with parameter to check the incoming data for
-    * every conceivable size or null error. Smaller size is acceptable, bigger or
-    * null is not.
+    * Private helper for constructor with parameter to check the incoming data 
+    * for every conceivable size or null error. Smaller size is acceptable, 
+    * bigger or null is not.
     */
    private boolean checkSize(String[] data)
    {
@@ -192,7 +172,9 @@ class BarcodeImage implements Cloneable
       return true;
    }
 
-   // accessor for each bit in the image
+   /*
+    * This method is an accessor that returns the boolean value for that 
+    */
    public boolean getPixel(int row, int col)
    {
       // test validate of parameters
@@ -461,8 +443,6 @@ class DataMatrix implements BarcodeIO
     */
    public void displayImageToConsole()
    {
-      System.out.println("width: " + getWidth());
-      System.out.println("height: " + getHeight());
       for (int i = BarcodeImage.MAX_HEIGHT - getHeight() - 2; i < BarcodeImage.MAX_HEIGHT; i++)
       {
          for (int j = 0; j < getWidth() + 2; j++)
@@ -487,20 +467,27 @@ class DataMatrix implements BarcodeIO
     */
    public boolean generateImageFromText()
    {
+      
       int index = 0;
       int letter;
 
+      if (this.text == null)
+         return false;
+      this.clearImage();
       // create closed limitation line
       this.generateLimitationLine();
       // create open border line
       this.generateOpenBorderLine();
 
       // fill in barcode image.
-      for (int x = 1; x < this.text.length(); x++)
+      for (int x = 1; x < this.text.length() + 1; x++)
       {
-         letter = this.text.charAt(index++);
+         letter = this.text.charAt(index);
+         index++;
          this.writeCharToCol(x, letter);
       }
+      this.actualHeight = this.computeSignalHeight();
+      this.actualWidth = this.computeSignalWidth();
       return false;
    }
 
@@ -510,18 +497,18 @@ class DataMatrix implements BarcodeIO
     */
    private boolean writeCharToCol(int col, int code)
    {
-      double divisor = 128;
-      int columnCounter = 9;
 
-      do
+      int y = BarcodeImage.MAX_HEIGHT - 2;
+      
+      while(code != 0)
       {
-         if ((code / divisor) > 1)
-            this.image.setPixel(col, columnCounter, true);
-         code /= divisor;
-         divisor /= 2;
-         columnCounter--;
-      } while (columnCounter > 0);
-      return false;
+         if (code % 2 == 1)
+            this.image.setPixel(y, col, true);
+         y--;
+         code /= 2;
+      }
+      
+      return true;
    }
 
    /*
@@ -530,13 +517,13 @@ class DataMatrix implements BarcodeIO
     */
    private void generateLimitationLine()
    {
-      for (int y = 0; y < 11; y++)
+      for (int y = BarcodeImage.MAX_HEIGHT; y > BarcodeImage.MAX_HEIGHT - 11; y--)
       {
-         this.image.setPixel(0, y, true);
+         this.image.setPixel(y, 0, true);
       }
-      for (int x = 0; x < this.text.length(); x++)
+      for (int x = 0; x < this.text.length() + 1; x++)
       {
-         this.image.setPixel(x, 0, true);
+         this.image.setPixel(BarcodeImage.MAX_HEIGHT - 1, x, true);
       }
    }
 
@@ -546,15 +533,15 @@ class DataMatrix implements BarcodeIO
     */
 private void generateOpenBorderLine()
 {
-     for (int x = 0; x < this.text.length() + 1; x++)
+     for (int x = 0; x < this.text.length() + 2; x++)
    {
       if (x % 2 == 0)
-        this.image.setPixel(10, x, true);
+        this.image.setPixel(BarcodeImage.MAX_HEIGHT - 10, x, true);
    }
-  for (int y = 0; y < 11; y++)
+  for (int y = BarcodeImage.MAX_HEIGHT; y > BarcodeImage.MAX_HEIGHT - 11; y--)
   {
-     if (y % 2 == 0)
-        this.image.setPixel(y, 10, true);
+     if (y % 2 == 1)
+        this.image.setPixel(y, this.text.length() + 1, true);
   }
 }
 
@@ -582,7 +569,7 @@ private void generateOpenBorderLine()
     */
    private char readCharFromCol(int col)
    {
-
+      
       char output = 0;
       int exp = 0;
       for (int row = BarcodeImage.MAX_HEIGHT - 2; row > BarcodeImage.MAX_HEIGHT - getHeight() - 1; row--)
@@ -596,6 +583,11 @@ private void generateOpenBorderLine()
       return output;
    }
 
+   public void displayTextToConsole()
+   {
+      System.out.println("The message is: " + this.text);
+   }
+
    /*
     * This method sets the image to white (false).
     */
@@ -605,7 +597,7 @@ private void generateOpenBorderLine()
       {
          for (int j = 0; j < BarcodeImage.MAX_WIDTH; j++)
          {
-            System.out.print(image.setPixel(' ',' ', false));
+            image.setPixel(i,j, false);
          }
          System.out.println();
       }

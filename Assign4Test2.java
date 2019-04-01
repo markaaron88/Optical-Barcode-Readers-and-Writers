@@ -227,7 +227,7 @@ class BarcodeImage implements Cloneable
    // Method just for debugging
    public void displayToConsole()
    {
-      for (int i = 0; i < MAX_WIDTH; i++) {
+      for (int i = 0; i <= MAX_WIDTH + 1; i++) {
          System.out.print("-");
       }
       System.out.println();
@@ -239,7 +239,7 @@ class BarcodeImage implements Cloneable
          System.out.println("|");
       }
       
-      for (int i = 0; i < MAX_WIDTH; i++) {
+      for (int i = 0; i <= MAX_WIDTH + 1; i++) {
          System.out.print("-");
       }
    }

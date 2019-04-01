@@ -482,7 +482,7 @@ class DataMatrix implements BarcodeIO
    public void displayImageToConsole()
    {
       // make top border
-      for (int x = 0; x < actualWidth; x++)
+      for (int x = 0; x <= actualWidth + 1; x++)
       {
          System.out.print("-");
       }
@@ -639,7 +639,7 @@ class DataMatrix implements BarcodeIO
    }
    
    public void displayRawImage() {
-      for (int i = 0; i <= BarcodeImage.MAX_WIDTH; i++) {
+      for (int i = 0; i <= BarcodeImage.MAX_WIDTH + 1; i++) {
          System.out.print("-");
       }
       System.out.println();
@@ -656,7 +656,7 @@ class DataMatrix implements BarcodeIO
          System.out.println("|");
       }
       
-      for (int i = 0; i <= BarcodeImage.MAX_WIDTH; i++) {
+      for (int i = 0; i <= BarcodeImage.MAX_WIDTH + 1; i++) {
          System.out.print("-");
       }
    }

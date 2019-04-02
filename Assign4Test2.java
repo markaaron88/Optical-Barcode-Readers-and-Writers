@@ -73,7 +73,7 @@ public class Assig4
       DataMatrix dm = new DataMatrix(bc);
 
       // First secret message
-      System.out.println("Translating image to text...");
+      System.out.println("\nTranslating image to text...");
       dm.translateImageToText();
       dm.displayTextToConsole();
       System.out.println("Showing Raw");
@@ -99,7 +99,6 @@ public class Assig4
       System.out.println("\nDisplaying the message and BarcodeImage: ");
       dm.displayTextToConsole();
       dm.displayImageToConsole();
-
    }
 }
 
@@ -234,7 +233,8 @@ class BarcodeImage implements Cloneable
       for (int i = 0; i < MAX_HEIGHT; i++) {
          System.out.print("|");
          for (int j = 0; j < MAX_WIDTH; j++) {
-            System.out.print(imageData[i][j] ? '*' : ' ');
+            System.out.print(imageData[i][j] ? 
+                  DataMatrix.BLACK_CHAR : DataMatrix.WHITE_CHAR);
          }
          System.out.println("|");
       }
@@ -250,13 +250,13 @@ class BarcodeImage implements Cloneable
  */
 class DataMatrix implements BarcodeIO
 {
+   public static final char BLACK_CHAR = '*';
+   public static final char WHITE_CHAR = ' ';
+   
    private BarcodeImage image;
    private int actualWidth;
    private int actualHeight;
    private String text;
-
-   public static final char BLACK_CHAR = '*';
-   public static final char WHITE_CHAR = ' ';
 
    /*
     * Default constructor for the DataMatrix object.
@@ -310,6 +310,7 @@ class DataMatrix implements BarcodeIO
    {
       if (bc == null)
          return false;
+      
       try
       {
          this.image = (BarcodeImage) bc.clone();
@@ -320,9 +321,6 @@ class DataMatrix implements BarcodeIO
       this.cleanImage();
       this.actualWidth = this.computeSignalWidth();
       this.actualHeight = this.computeSignalHeight();
-      System.out.println();
-      System.out.println("width " + this.actualWidth);
-      System.out.println("height " + this.actualHeight);
       return true;
    }
 
@@ -355,6 +353,10 @@ class DataMatrix implements BarcodeIO
          {
             width++;
          }
+         else
+         {
+            break;
+         }
       }
       return width;
    }
@@ -371,6 +373,10 @@ class DataMatrix implements BarcodeIO
          if (image.getPixel(i, 0))
          {
             height++;
+         }
+         else 
+         {
+            break;
          }
       }
       return height;
@@ -389,17 +395,17 @@ class DataMatrix implements BarcodeIO
       int col = 0;
 
       // locate top left corner of barcode image - blank columns
-      loop:
-      for (x = 0; x < BarcodeImage.MAX_WIDTH; x++)
-      {
-         for (y = 0; y < BarcodeImage.MAX_HEIGHT; y++)
-         {
-            pixel = this.image.getPixel(y, x);
-            if (pixel)
-               break loop;
+      loop: 
+         for (x = 0; x < BarcodeImage.MAX_WIDTH; x++) 
+         {   
+            for (y = 0; y < BarcodeImage.MAX_HEIGHT; y++) 
+            {   
+               pixel = this.image.getPixel(y, x);
+               if (pixel)
+                  break loop;
+            }
+            count++;
          }
-         count++;
-      }
 
       // traverse to lower left corner of BarcodeImage - blank rows
       loop2:
@@ -422,17 +428,15 @@ class DataMatrix implements BarcodeIO
     */
    private void moveImageToLowerLeft(int xOffset, int yOffset)
    {
+      //test parameters validity
       if (xOffset < 0 || xOffset >= BarcodeImage.MAX_WIDTH || yOffset < 0 || 
             yOffset >= BarcodeImage.MAX_HEIGHT) 
       { 
          return;
       }
-      if (xOffset > 0) {
+    
          this.shiftImageLeft(xOffset);
-      }
-      if (yOffset > 0) {
          this.shiftImageDown(yOffset);
-      }
    }
 
    /*
@@ -441,16 +445,17 @@ class DataMatrix implements BarcodeIO
     */
    private void shiftImageDown(int offset)
    {
-      if (offset < 0 || offset >= BarcodeImage.MAX_HEIGHT) 
+      if (offset <= 0 || offset >= BarcodeImage.MAX_HEIGHT) 
       {
          return;
       }
       
+      //test a parameter validity, of offset is 0, just don't shift
       for (int row = BarcodeImage.MAX_HEIGHT - 1 - offset; row >= 0; row--) {
          for (int col = 0; col < BarcodeImage.MAX_WIDTH; col++) {
-            if (image.getPixel(row, col)) {
-               image.setPixel(row + offset, col, true);
-               image.setPixel(row, col, false);
+            if (this.image.getPixel(row, col)) {
+               this.image.setPixel(row + offset, col, true);
+               this.image.setPixel(row, col, false);
             }
          }
       }
@@ -461,15 +466,16 @@ class DataMatrix implements BarcodeIO
     */
    private void shiftImageLeft(int offset)
    {
-      if (offset < 0 || offset >= BarcodeImage.MAX_WIDTH) 
+      //test a parameter validity, of offset is 0, just don't shift
+      if (offset <= 0 || offset >= BarcodeImage.MAX_WIDTH) 
       {
          return;
       }
       for (int i = 0; i < BarcodeImage.MAX_HEIGHT; i++) {
          for (int j = offset; j < BarcodeImage.MAX_WIDTH; j++) {
-            if (image.getPixel(i, j)) {
-               image.setPixel(i, j - offset, true);
-               image.setPixel(i, j, false);
+            if (this.image.getPixel(i, j)) {
+               this.image.setPixel(i, j - offset, true);
+               this.image.setPixel(i, j, false);
             }
          }
       }
@@ -482,22 +488,28 @@ class DataMatrix implements BarcodeIO
    public void displayImageToConsole()
    {
       // make top border
-      for (int x = 0; x <= actualWidth + 1; x++)
+      for (int x = 0; x <= getWidth() + 1; x++)
       {
          System.out.print("-");
       }
       System.out.println();
       
-      for (int i = BarcodeImage.MAX_HEIGHT - actualHeight; 
+      for (int i = BarcodeImage.MAX_HEIGHT - getHeight(); 
          i < BarcodeImage.MAX_HEIGHT; i++)
       {
          System.out.print("|");
-         for (int j = 0; j < actualWidth; j++)
+         for (int j = 0; j < getWidth(); j++)
          {
             System.out.print(this.image.getPixel(i,j) ? 
                BLACK_CHAR : WHITE_CHAR);
          }
          System.out.println("|");
+      }
+      
+      // make bottom border
+      for (int x = 0; x <= getWidth() + 1; x++)
+      {
+         System.out.print("-");
       }
    }
 
@@ -521,7 +533,7 @@ class DataMatrix implements BarcodeIO
       // fill in barcode image.
       for (int x = 1; x < this.text.length() + 1; x++)
       {
-         letter = this.text.charAt(index);
+         letter = (int)this.text.charAt(index);
          index++;
          this.writeCharToCol(x, letter);
       }
@@ -536,6 +548,11 @@ class DataMatrix implements BarcodeIO
     */
    private boolean writeCharToCol(int col, int code)
    {
+      // test parameters validity
+      if (col <= 0 || col >= BarcodeImage.MAX_WIDTH || code < 0 || code > 255)
+      {
+         return false;
+      }
 
       int y = BarcodeImage.MAX_HEIGHT - 2;
       
@@ -551,12 +568,12 @@ class DataMatrix implements BarcodeIO
    }
 
    /*
-    * This method creates a limitation line for the BarcodeImage object saved in
+    * This method creates limitation line for the BarcodeImage object saved in
     * the DataMatrix.
     */
    private void generateLimitationLine()
    {
-      for (int y = BarcodeImage.MAX_HEIGHT; 
+      for (int y = BarcodeImage.MAX_HEIGHT-1; 
          y > BarcodeImage.MAX_HEIGHT - 11; y--)
       {
          this.image.setPixel(y, 0, true);
@@ -578,6 +595,7 @@ class DataMatrix implements BarcodeIO
       if (x % 2 == 0)
          this.image.setPixel(BarcodeImage.MAX_HEIGHT - 10, x, true);
       }
+      
       for (int y = BarcodeImage.MAX_HEIGHT; y > BarcodeImage.MAX_HEIGHT - 11;
          y--)
       {
@@ -635,7 +653,7 @@ class DataMatrix implements BarcodeIO
     */
    public void displayTextToConsole()
    {
-      System.out.println("The message is: " + this.text);
+      System.out.println("\nThe message is: " + this.text);
    }
    
    public void displayRawImage() {
@@ -677,3 +695,128 @@ class DataMatrix implements BarcodeIO
       this.actualHeight = 0; 
    }
 }
+
+/*----------------------------- Run Sample -----------------------------------
+Beginning BarcodeImage and DataMatrix test
+Printing out BarcodeImage input:
+-------------------------------------------------------------------
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|     * * * * * * * * * * * * * * * * * * * * *                   |
+|     *                                       *                   |
+|     ****** **** ****** ******* ** *** *****                     |
+|     *     *    ******************************                   |
+|     * **    * *        **  *    * * *   *                       |
+|     *   *    *  *****    *   * *   *  **  ***                   |
+|     *  **     * *** **   **  *    **  ***  *                    |
+|     ***  * **   **  *   ****    *  *  ** * **                   |
+|     *****  ***  *  * *   ** ** **  *   * *                      |
+|     *****************************************                   |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+-------------------------------------------------------------------
+Translating image to text...
+
+The message is: CSUMB CSIT online program is top notch.
+Showing Raw
+-------------------------------------------------------------------
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|                                                                 |
+|* * * * * * * * * * * * * * * * * * * * *                        |
+|*                                       *                        |
+|****** **** ****** ******* ** *** *****                          |
+|*     *    ******************************                        |
+|* **    * *        **  *    * * *   *                            |
+|*   *    *  *****    *   * *   *  **  ***                        |
+|*  **     * *** **   **  *    **  ***  *                         |
+|***  * **   **  *   ****    *  *  ** * **                        |
+|*****  ***  *  * *   ** ** **  *   * *                           |
+|*****************************************                        |
+-------------------------------------------------------------------
+Now you see formatted image without blank right columns and blank top rows.
+Enjoy!
+
+-------------------------------------------
+|* * * * * * * * * * * * * * * * * * * * *|
+|*                                       *|
+|****** **** ****** ******* ** *** *****  |
+|*     *    ******************************|
+|* **    * *        **  *    * * *   *    |
+|*   *    *  *****    *   * *   *  **  ***|
+|*  **     * *** **   **  *    **  ***  * |
+|***  * **   **  *   ****    *  *  ** * **|
+|*****  ***  *  * *   ** ** **  *   * *   |
+|*****************************************|
+-------------------------------------------
+Processing second test image...
+
+The message is: You did it!  Great work.  Celebrate.
+
+Now you see formatted image without blank right columns and blank top rows.
+Enjoy!
+
+----------------------------------------
+|* * * * * * * * * * * * * * * * * * * |
+|*                                    *|
+|**** *** **   ***** ****   *********  |
+|* ************ ************ **********|
+|** *      *    *  * * *         * *   |
+|***   *  *           * **    *      **|
+|* ** * *  *   * * * **  *   ***   *** |
+|* *           **    *****  *   **   **|
+|****  *  * *  * **  ** *   ** *  * *  |
+|**************************************|
+----------------------------------------
+Processing custom message...
+
+Displaying the message and BarcodeImage: 
+
+The message is: What a great resume builder this is!
+----------------------------------------
+|* * * * * * * * * * * * * * * * * * * |
+|*                                    *|
+|***** * ***** ****** ******* **** **  |
+|* ************************************|
+|**  *    *  * * **    *    * *  *  *  |
+|* *               *    **     **  *  *|
+|**  *   * * *  * ***  * ***  *        |
+|**      **    * *    *     *    *  * *|
+|** *  * * **   *****  **  *    ** *** |
+|**************************************|
+----------------------------------------
+
+----------------------------------------------------------------------------*/

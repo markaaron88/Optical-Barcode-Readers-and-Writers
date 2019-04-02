@@ -429,30 +429,28 @@ class DataMatrix implements BarcodeIO
       int col = 0;
 
       // locate top left corner of barcode image - blank columns
-      loop: 
-         for (x = 0; x < BarcodeImage.MAX_WIDTH; x++) 
-         {   
-            for (y = 0; y < BarcodeImage.MAX_HEIGHT; y++) 
-            {   
-               pixel = this.image.getPixel(y, x);
-               if (pixel)
-                  break loop;
-            }
-            count++;
+      for (x = 0; x < BarcodeImage.MAX_WIDTH; x++) {
+         for (y = 0; y < BarcodeImage.MAX_HEIGHT; y++) {
+            pixel = this.image.getPixel(y, x);
+            if (pixel)
+               break;
          }
+         if (pixel)
+            break;
+         count++;
+      }
 
       // traverse to lower left corner of BarcodeImage - blank rows
-      loop2:
-         for (x = BarcodeImage.MAX_HEIGHT -1; x >= 0; x--)
-         {
-            for (y = 0; y < BarcodeImage.MAX_WIDTH; y++)
-            {
-               pixel = this.image.getPixel(x, y);
-               if (pixel)
-                  break loop2;
-            }
-            col++;
+      for (x = BarcodeImage.MAX_HEIGHT - 1; x >= 0; x--) {
+         for (y = 0; y < BarcodeImage.MAX_WIDTH; y++) {
+            pixel = this.image.getPixel(x, y);
+            if (pixel)
+               break;
          }
+         if (pixel)
+            break;
+         col++;
+      }
       this.moveImageToLowerLeft(count, col);
    }
 
